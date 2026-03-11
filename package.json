@@ -1,0 +1,19 @@
+{
+  "name": "nxtmarket",
+  "version": "1.0.0",
+  "description": "## Setup",
+  "main": "server.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "nodemon": "^3.1.14"
+  }
+}
