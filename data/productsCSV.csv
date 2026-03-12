@@ -1,0 +1,11 @@
+sku,title,description,price,stock,images,categories
+NX-4001,Laptop Stand,Aluminum adjustable stand,25.00,100,stand.jpg,accessories;office
+NX-4002,Webcam 1080p,HD webcam with built-in mic,45.99,30,webcam.jpg,peripherals;video
+NX-4003,Bluetooth Speaker,Portable waterproof speaker,35.50,50,speaker.jpg,audio;electronics
+NX-4004,Gaming Mousepad,Large extended desk pad,15.00,200,mousepad.jpg,peripherals;gaming
+NX-4005,Monitor Arm,Single desk mount arm,55.00,25,arm.jpg,accessories;office
+NX-4006,USB Flash Drive 64GB,USB 3.0 high speed drive,12.99,150,drive.jpg,storage
+NX-4007,Noise Cancelling Headphones,Over-ear ANC headphones,120.00,15,headphones.jpg,audio;peripherals
+NX-4008,HDMI Cable 2m,Braided HDMI 2.1 cable,9.99,300,hdmi.jpg,adapters;cables
+NX-4009,Smartphone Stand,Adjustable phone holder,8.50,120,phonestand.jpg,accessories
+NX-4010,Ergonomic Chair,Mesh breathable office chair,199.99,10,chair.jpg,furniture;office

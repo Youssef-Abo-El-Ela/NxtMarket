@@ -1,3 +1,4 @@
+const { importProductsCSV } = require('../../utils/csvParser');
 const Product = require('./productsModel');
 
 
@@ -75,6 +76,18 @@ const addProductImage = async (req, res) => {
     res.status(200).json(product);
 }
 
+const importProducts = async (req, res) => {
+    if (!req.file) {
+        const err = new Error('CSV file is required');
+        err.statusCode = 400;
+        throw err;
+    }
+    const filePath = req.file.path;
+    const result = await importProductsCSV(filePath, Product);
+    res.status(200).json(result);
+};
+
+
 module.exports = {
     createProduct,
     getProductById,
@@ -82,5 +95,6 @@ module.exports = {
     getProducts,
     updateProduct,
     deleteProduct,
-    addProductImage
+    addProductImage,
+    importProducts
 }

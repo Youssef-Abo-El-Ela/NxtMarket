@@ -2,7 +2,7 @@ const multer = require('multer');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
-const storage = multer.diskStorage({
+const imageStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, path.join(__dirname, '..', '..', 'public', 'images'));
     },
@@ -12,6 +12,15 @@ const storage = multer.diskStorage({
         const finalFilename = `${uniqueId}${extension}`;
 
         cb(null, finalFilename);
+    }
+});
+
+const csvStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, '..', '..', 'data', 'csv'));
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${Date.now()}-${file.originalname}`); // Unique filename with timestamp
     }
 });
 
@@ -33,12 +42,33 @@ const imageFilter = (req, file, cb) => {
     }
 };
 
-const upload = multer({
-    storage: storage,
+const csvFilter = (req, file, cb) => {
+    const allowedTypes = /csv/;
+    const isValidExt = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const isValidMime = allowedTypes.test(file.mimetype);
+    if (isValidExt && isValidMime) {
+        return cb(null, true);
+    } else {
+        return cb(new Error('Invalid file type. Only CSV files are allowed!'), false);
+    }
+};
+
+const uploadCSV = multer({
+    storage: csvStorage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB
+    },
+    fileFilter: csvFilter
+});
+
+
+const uploadImages = multer({
+    storage: imageStorage,
     limits: {
         fileSize: 2 * 1024 * 1024 //2MB
     },
     fileFilter: imageFilter
 });
 
-module.exports = upload;
+
+module.exports = { uploadImages, uploadCSV };
