@@ -2,8 +2,8 @@
 const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
-const Product = require('../src/modules/products/product.model');
-const User = require('../src/modules/users/user.model');
+const Product = require('../src/modules/products/productsModel');
+const User = require('../src/modules/users/usersModel');
 
 async function seed() {
   const data = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/seed-mongo.json')));
