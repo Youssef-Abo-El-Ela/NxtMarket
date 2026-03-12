@@ -37,9 +37,20 @@ const productSchema = new mongoose.Schema({
     embeddedReviews: {
         type: [
             {
-                userID: String,
-                rating: Number,
-                comment: String,
+                userID: {
+                    type: String,
+                    required: true
+                },
+                rating: {
+                    type: Number,
+                    min: 1,
+                    max: 5,
+                    required: true
+                },
+                comment: {
+                    type: String,
+                    required: false
+                },
                 date: { type: Date, default: Date.now }
             }
         ],
