@@ -1,5 +1,7 @@
 const Product = require("../products/productsModel");
 const { OrderItem, Order } = require("./ordersModel");
+const fs = require('fs');
+const path = require('path');
 
 const createOrder = async (req, res) => {
     const { requiredOrders } = req.body;
@@ -55,10 +57,45 @@ const getOrderById = async (req, res) => {
     res.status(200).json({ order, message: "Order fetched successfully" });
 }
 
+const updateOrderStatus = async (req, res) => {
+    const orderId = req.params.id;
+    const { status } = req.body;
+    const order = await Order.findByPk(orderId);
+    if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+    }
+    order.status = status;
+    req.io.to(`order:${orderId}`).emit('order_status_changed', {
+        orderId,
+        status,
+        message: 'Order status updated successfully'
+    });
+
+    await order.save();
+
+    res.status(200).json({ order, message: "Order status updated successfully" });
+}
+
+const getOrderPageById = async (req, res) => {
+    const orderId = req.params.id;
+    const order = await Order.findOne({ where: { id: orderId }, include: [{ model: OrderItem, as: 'items' }] });
+    if (!order) {
+        return res.status(404).json({ message: 'Order not found' });
+    }
+
+    let orderPageHtml = await fs.promises.readFile(path.join(__dirname, '..', '..', '..', 'public', 'templates', 'order.html'), 'utf-8');
+    orderPageHtml = orderPageHtml.replace('{{ORDER_ID}}', String(order.id));
+    orderPageHtml = orderPageHtml.replace('{{ORDER_STATUS}}', String(order.status || 'pending'));
+
+    res.send(orderPageHtml);
+}
+
 
 module.exports = {
     createOrder,
     getOrdersUser,
     getOrdersAdmin,
-    getOrderById
+    getOrderById,
+    updateOrderStatus,
+    getOrderPageById
 }

@@ -136,7 +136,7 @@ const getProductPageBySKU = async (req, res) => {
         .replaceAll('{{REVIEWS}}', product.reviews ? product.reviews.map(review => ` <li style="padding:8px 0;border-bottom:1px solid #eee;">
         <span>${review.rating}★</span> — <span>${review.comment}</span>
         </li>`).join('') : '<p>No reviews yet.</p>');
-
+    
     res.send(renderedHtml);
 };
 

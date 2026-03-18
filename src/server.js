@@ -1,7 +1,10 @@
-const { app } = require('./app')
+const { server, io } = require('./app')
 const { port } = require('./config/env')
+const setupOrdersSocket = require('./sockets/ordersSocket')
 
+// Setup sockets
+setupOrdersSocket(io);
 
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 })

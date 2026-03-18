@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .order-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .status-pending { background-color: #ffc107; color: white; }
+        .status-processing { background-color: #17a2b8; color: white; }
+        .status-shipped { background-color: #28a745; color: white; }
+        .status-delivered { background-color: #20c997; color: white; }
+        .status-cancelled { background-color: #dc3545; color: white; }
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error { color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="order-container">
+        <h1>Order Status</h1>
+        <p><strong>Order ID:</strong> <span id="orderId">{{ORDER_ID}}</span></p>
+        <p><strong>Status:</strong> <span id="statusContainer"></span></p>
+        <p id="message" style="margin-top: 20px;"></p>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const orderId = document.getElementById('orderId').textContent;
+        const statusContainer = document.getElementById('statusContainer');
+        const messageDiv = document.getElementById('message');
+        const socket = io();
+
+        socket.on('connect', () => {
+            socket.emit('join_order_room', orderId);
+            updateOrderStatus({
+                status: '{{ORDER_STATUS}}',
+                message: 'Connected. Waiting for order updates.'
+            });
+        });
+
+        socket.on('order_status_changed', (data) => {
+            if (String(data.orderId) !== String(orderId)) return;
+            updateOrderStatus(data);
+        });
+
+        socket.on('connect_error', () => {
+            statusContainer.innerHTML = '<span class="error">Connection error</span>';
+        });
+
+        socket.on('disconnect', () => {
+            messageDiv.textContent = 'Disconnected from realtime updates.';
+        });
+
+        function updateOrderStatus(data) {
+            const status = data.status || 'unknown';
+            const statusBadge = `<span class="status-badge status-${status.toLowerCase()}">${status.toUpperCase()}</span>`;
+            statusContainer.innerHTML = statusBadge;
+
+            if (data.message) {
+                messageDiv.textContent = data.message;
+            }
+        }
+    </script>
+</body>
+</html>
