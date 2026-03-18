@@ -5,7 +5,7 @@ module.exports = {
   sql: {
     database: process.env.SQL_DB || 'nxtmarket',
     username: process.env.SQL_USER || 'root',
-    password: process.env.SQL_PASS || '',
+    password: process.env.SQL_PASS || 'password',
     host: process.env.SQL_HOST || 'localhost',
     dialect: process.env.SQL_DIALECT || 'postgres'
   },

@@ -2,11 +2,12 @@
 const fs = require('fs');
 const path = require('path');
 const { sequelize } = require('../src/config/db.sql');
-const { Order } = require('../src/modules/orders/order.model');
-const { OrderItem } = require('../src/modules/orders/orderItem.model');
+const { Order } = require('../src/modules/orders/ordersModel');
+const { OrderItem } = require('../src/modules/orders/ordersModel');
 
 async function seed() {
   const data = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/seed-sql.json')));
+  await sequelize.sync({ force: true });
   await Order.destroy({ where: {} });
   await OrderItem.destroy({ where: {} });
   const createdOrders = [];
@@ -15,7 +16,7 @@ async function seed() {
     createdOrders.push(newOrder);
   }
   for (const item of data.orderItems) {
-    await OrderItem.create({ ...item, orderId: createdOrders[item.orderIndex].id });
+    await OrderItem.create({ ...item, orderID: createdOrders[item.orderIndex].id });
   }
   console.log('SQL seed data imported');
   process.exit();

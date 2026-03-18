@@ -18,7 +18,7 @@ const register = async (req, res) => {
     res.status(201).json({ message: 'User registered successfully' });
 }
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
     const {email , password} = req.body;
     if(!email || !password){
         const err = new Error('Email and password are required');
