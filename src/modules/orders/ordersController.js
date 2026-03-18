@@ -31,7 +31,10 @@ const createOrder = async (req, res) => {
     }));
 
     await Promise.all(products.map(async (product) => {
-        await Product.findOneAndUpdate({ sku: product.sku }, { $inc: { stock: -requiredOrders.find(reqOrder => reqOrder.sku === product.sku).qty } });
+        const productDB = await Product.findOneAndUpdate({ sku: product.sku }, { $inc: { stock: -requiredOrders.find(reqOrder => reqOrder.sku === product.sku).qty } });
+        if(productDB.stock < 5) {
+            req.io.to('vendors').emit('low_stock', { product, message: 'Low stock alert' });
+        }
     }));
 
     newOrder.total = totalPrice;

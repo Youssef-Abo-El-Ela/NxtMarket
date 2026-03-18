@@ -3,9 +3,11 @@ const { ROLE } = require("../../utils/enums");
 const User = require("./usersModel");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
 
 const register = async (req, res) => {
-    const { name, email, password , role = ROLE.USER} = req.body;
+    const { name, email, password, role = ROLE.USER } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
         const err = new Error('Email already in use');
@@ -19,20 +21,20 @@ const register = async (req, res) => {
 }
 
 const login = async (req, res, next) => {
-    const {email , password} = req.body;
-    if(!email || !password){
+    const { email, password } = req.body;
+    if (!email || !password) {
         const err = new Error('Email and password are required');
         err.statusCode = 400;
         return next(err);
     }
     const user = await User.findOne({ email });
-    if(!user){
+    if (!user) {
         const err = new Error('Invalid email or password');
         err.statusCode = 400;
         return next(err);
     }
     const isMatch = await bcrypt.compare(password, user.password);
-    if(!isMatch){
+    if (!isMatch) {
         const err = new Error('Invalid email or password');
         err.statusCode = 400;
         return next(err);
@@ -42,7 +44,21 @@ const login = async (req, res, next) => {
 }
 
 
+const getTodayLogs = async (req, res, next) => {
+    const logFilePath = path.join(__dirname, '..', '..','..', 'logs', 'requests.log');
+    const { lines } = req.query;
+    const numLines = parseInt(lines) || 50;
+
+    const nLogs = fs.readFileSync(logFilePath, 'utf-8')
+        .split('\n')
+        .filter(line => line.trim() !== '')
+        .slice(-numLines);
+
+    res.status(200).json({ logs: nLogs });
+}
+
 module.exports = {
     register,
-    login
+    login,
+    getTodayLogs
 }
