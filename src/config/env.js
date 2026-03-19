@@ -9,5 +9,10 @@ module.exports = {
     host: process.env.SQL_HOST || 'localhost',
     dialect: process.env.SQL_DIALECT || 'postgres'
   },
-  jwtSecret: process.env.JWT_SECRET || 'secret'
+  jwtSecret: process.env.JWT_SECRET || 'secret',
+  redis: {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: process.env.REDIS_PORT || 6379,
+    password: process.env.REDIS_PASSWORD || undefined,
+  }
 };

@@ -2,10 +2,22 @@ const path = require('path');
 const { importProductsCSV } = require('../../utils/csvParser');
 const Product = require('./productsModel');
 const fs = require('fs')
+const redis = require('../../config/redis');
+
+
+const safeUnlinkScript = `
+  local keys = redis.call('keys', ARGV[1])
+  if #keys > 0 then
+    return redis.call('unlink', unpack(keys))
+  end
+  return 0
+`;
 
 const createProduct = async (req, res) => {
     const newProduct = new Product(req.body);
     await newProduct.save();
+    redis.eval(safeUnlinkScript, 0, 'products_*');
+    redis.eval(safeUnlinkScript, 0, 'product_*');
     res.status(201).json(newProduct);
 }
 
@@ -21,11 +33,20 @@ const getProductById = async (req, res) => {
 
 const getProductBySKU = async (req, res) => {
     const product = await Product.findOne({ sku: req.params.sku });
+
+    const cachedProduct = await redis.get(`product_${req.params.sku}`);
+    if (cachedProduct) {
+        console.log('Cache hit');
+        return res.status(200).json(JSON.parse(cachedProduct));
+    }
+
     if (!product) {
         const err = new Error('Product not found');
         err.statusCode = 404;
         throw err;
     }
+
+    await redis.set(`product_${req.params.sku}`, JSON.stringify(product), 'EX', 7200);
     res.status(200).json(product);
 }
 
@@ -33,6 +54,11 @@ const getProducts = async (req, res) => {
     const products = await Product.find();
     let filteredProducts = products;
     const { title, category, limit = 10, page = 1 } = req.query;
+
+    const cachedContent = await redis.get(`products_${title || ''}_${category || ''}_${page}_${limit}`);
+    if (cachedContent) {
+        return res.status(200).json(JSON.parse(cachedContent));
+    }
 
     if (title) {
         filteredProducts = filteredProducts.filter(product => product.title.toLowerCase().includes(title.toLowerCase()));
@@ -42,6 +68,9 @@ const getProducts = async (req, res) => {
     }
     filteredProducts = [...new Set(filteredProducts)];
     filteredProducts = filteredProducts.slice((page - 1) * limit, page * limit);
+
+    await redis.set(`products_${title || ''}_${category || ''}_${page}_${limit}`, JSON.stringify(filteredProducts), 'EX', 3600);
+
     res.status(200).json(filteredProducts);
 }
 
@@ -52,6 +81,8 @@ const updateProduct = async (req, res) => {
         err.statusCode = 404;
         throw err;
     }
+    redis.eval(safeUnlinkScript, 0, 'products_*');
+    redis.eval(safeUnlinkScript, 0, 'product_*');
     res.status(200).json(product);
 }
 
@@ -136,7 +167,7 @@ const getProductPageBySKU = async (req, res) => {
         .replaceAll('{{REVIEWS}}', product.reviews ? product.reviews.map(review => ` <li style="padding:8px 0;border-bottom:1px solid #eee;">
         <span>${review.rating}★</span> — <span>${review.comment}</span>
         </li>`).join('') : '<p>No reviews yet.</p>');
-    
+
     res.send(renderedHtml);
 };
 
