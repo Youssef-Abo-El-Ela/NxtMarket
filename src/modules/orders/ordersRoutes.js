@@ -11,6 +11,6 @@ ordersRouter.get("/user", auth, roleChecker([ROLE.USER]), catchAsync(getOrdersUs
 ordersRouter.get("/admin", auth, roleChecker([ROLE.ADMIN]), catchAsync(getOrdersAdmin));
 ordersRouter.get("/:id", auth, roleChecker([ROLE.USER, ROLE.ADMIN]), catchAsync(getOrderById));
 ordersRouter.patch("/:id/status", auth, roleChecker([ROLE.ADMIN, ROLE.VENDOR]), catchAsync(updateOrderStatus));
-ordersRouter.get("/:id/page", catchAsync(getOrderPageById));
+ordersRouter.get("/:id/page", auth, roleChecker([ROLE.USER, ROLE.ADMIN]), catchAsync(getOrderPageById));
 
 module.exports = ordersRouter

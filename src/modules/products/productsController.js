@@ -127,7 +127,7 @@ const addReview = async (req, res) => {
         err.statusCode = 404;
         throw err;
     }
-    product.reviews.push({ userID: req.user.id, rating, comment });
+    product.embeddedReviews.push({ userID: req.user.id, rating, comment });
     await product.save();
     res.status(200).json(product);
 }
@@ -164,7 +164,7 @@ const getProductPageBySKU = async (req, res) => {
         .replaceAll('{{STOCK}}', product.stock)
         .replaceAll('{{IMAGE_URL}}', `/images/${product.images[0]}`)
         .replaceAll('{{SKU}}', product.sku)
-        .replaceAll('{{REVIEWS}}', product.reviews ? product.reviews.map(review => ` <li style="padding:8px 0;border-bottom:1px solid #eee;">
+        .replaceAll('{{REVIEWS}}', product.embeddedReviews ? product.embeddedReviews.map(review => ` <li style="padding:8px 0;border-bottom:1px solid #eee;">
         <span>${review.rating}★</span> — <span>${review.comment}</span>
         </li>`).join('') : '<p>No reviews yet.</p>');
 
